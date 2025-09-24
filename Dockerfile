@@ -5,6 +5,9 @@ WORKDIR /app
 # Copia o código para dentro do container
 COPY . .
 
+# Garante permissão de execução ao mvnw
+RUN chmod +x mvnw
+
 # Compila o projeto e gera o jar
 RUN ./mvnw clean package -DskipTests
 
