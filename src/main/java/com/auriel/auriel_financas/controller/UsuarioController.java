@@ -5,6 +5,7 @@ import com.auriel.auriel_financas.dto.UsuarioDTO;
 import com.auriel.auriel_financas.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -20,5 +21,11 @@ public class UsuarioController {
     public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody UsuarioCreateDTO usuarioCreateDTO) {
         UsuarioDTO novoUsuario = usuarioService.criarUsuario(usuarioCreateDTO);
         return ResponseEntity.ok(novoUsuario);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+        List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+        return ResponseEntity.ok(usuarios);
     }
 }

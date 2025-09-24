@@ -6,6 +6,7 @@ import com.auriel.auriel_financas.model.Usuario;
 import com.auriel.auriel_financas.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.List;
 
 @Service
 public class UsuarioService {
@@ -34,5 +35,12 @@ public class UsuarioService {
 
         // Retorna DTO sem senha
         return new UsuarioDTO(novoUsuario.getId(), novoUsuario.getNome(), novoUsuario.getEmail());
+    }
+
+    public List<UsuarioDTO> listarUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios.stream()
+                .map(usuario -> new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail()))
+                .toList();
     }
 }
