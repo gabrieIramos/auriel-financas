@@ -6,7 +6,6 @@ import com.auriel.auriel_financas.model.Usuario;
 import com.auriel.auriel_financas.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.auriel.auriel_financas.exception.UsuarioCreateHandler;
 
 @Service
 public class UsuarioService {
@@ -22,7 +21,7 @@ public class UsuarioService {
     public UsuarioDTO criarUsuario(UsuarioCreateDTO usuarioCreateDTO) {
         
         if (usuarioRepository.existsByEmail(usuarioCreateDTO.getEmail())) {
-            throw new UsuarioCreateHandler("Email já cadastrado");
+            throw new Error("Email já cadastrado");
         }
 
 

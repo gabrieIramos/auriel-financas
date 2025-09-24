@@ -1,9 +1,9 @@
-package com.auriel.auriel_financas.exception;
+// package com.auriel.auriel_financas.exception;
 
-public class UsuarioCreateHandler extends RuntimeException {
+// public class UsuarioCreateHandler extends RuntimeException {
 
-    public UsuarioCreateHandler(String message) {
-        super(message);
-    }
-}
+//     public UsuarioCreateHandler(String message) {
+//         super(message);
+//     }
+// }
 
