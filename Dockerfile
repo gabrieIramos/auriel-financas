@@ -1,5 +1,5 @@
 # Etapa 1: Build da aplicação
-FROM eclipse-temurin:17-jdk AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
 # Copia o código para dentro do container
@@ -12,7 +12,7 @@ RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
 # Etapa 2: Imagem final
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copia o jar da etapa de build
