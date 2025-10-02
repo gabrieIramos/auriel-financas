@@ -3,7 +3,6 @@ package com.auriel.auriel_financas.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.auriel.auriel_financas.dtos.AtivoDTO.AtivoResponseDTO;
 import com.auriel.auriel_financas.dtos.AtivoDTO.AtivoUpdateDTO;
 import com.auriel.auriel_financas.exception.GlobalException;
-import com.auriel.auriel_financas.dtos.AtivoDTO.AtivoCreateDTO;
 import com.auriel.auriel_financas.model.Ativo;
 import com.auriel.auriel_financas.repository.AtivoRepository;
 import java.util.List;

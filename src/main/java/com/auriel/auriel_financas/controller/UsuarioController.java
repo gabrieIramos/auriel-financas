@@ -6,7 +6,6 @@ import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioUpdateDTO;
 import com.auriel.auriel_financas.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -26,8 +25,8 @@ public class UsuarioController {
 
     @PostMapping("/autenticar")
     public ResponseEntity<String> autenticarUsuario(@RequestParam String email, @RequestParam String senha) {
-        String mensagem = usuarioService.autenticar(email, senha);
-        return ResponseEntity.ok().body(mensagem);
+        String token = usuarioService.autenticar(email, senha);
+        return ResponseEntity.ok().body(token);
     }
 
     @PatchMapping("/{idUsuario}")

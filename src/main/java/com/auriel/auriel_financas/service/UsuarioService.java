@@ -7,10 +7,13 @@ import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioCreateDTO;
 import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioResponseDTO;
 import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioUpdateDTO;
 import com.auriel.auriel_financas.exception.GlobalException;
+import com.auriel.auriel_financas.jwt.JwtService; 
+import com.auriel.auriel_financas.model.UserDetailsImpl; 
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-
+import org.springframework.security.authentication.AuthenticationManager; 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication; 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
@@ -18,10 +21,14 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager; 
+    private final JwtService jwtService; 
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     public UsuarioResponseDTO registrar(UsuarioCreateDTO usuarioCreateDTO) {
@@ -49,24 +56,32 @@ public class UsuarioService {
     }
 
     public String autenticar(String email, String senha) {
-        Usuario usuario = usuarioRepository.findByEmail(email);
-        if (usuario == null) {
-            throw GlobalException.loginIncorreto();
-        }
-
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-            throw GlobalException.loginIncorreto();
-        }
-
-        LocalDateTime horaAtual = LocalDateTime.now();
-        usuario.setUltimoLogin(horaAtual);
         
-        usuarioRepository.save(usuario);
+        Authentication authentication;
+        try {
+            // Tenta autenticar
+            authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, senha)
+            );
+        } catch (Exception e) {            
+            throw GlobalException.loginIncorreto(); 
+        }
 
-        // IMPLEMENTAR JWT AQUI DEPOIS
+        if (authentication.isAuthenticated()) {
+            
+            // Atualiza o último login
+            Usuario usuario = usuarioRepository.findByEmail(email);
+            LocalDateTime horaAtual = LocalDateTime.now();
+            usuario.setUltimoLogin(horaAtual);
+            usuarioRepository.save(usuario);
 
-        return "Autenticação bem-sucedida";
+            // Gera e retorna o token JWT
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            return jwtService.generateToken(userDetails);
 
+        } else {
+            throw GlobalException.loginIncorreto();
+        }
     }
 
     public UsuarioResponseDTO atualizarPerfil(Long idUsuario, UsuarioUpdateDTO usuarioUpdateDTO) {

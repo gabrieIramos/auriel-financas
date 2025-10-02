@@ -1,7 +1,4 @@
 package com.auriel.auriel_financas.dtos.CarteiraDTO;
-import java.math.BigDecimal;
-
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
