@@ -1,15 +1,17 @@
 package com.auriel.auriel_financas.service;
 
-import com.auriel.auriel_financas.dto.UsuarioCreateDTO;
-import com.auriel.auriel_financas.dto.UsuarioDTO;
 import com.auriel.auriel_financas.model.Usuario;
 import com.auriel.auriel_financas.repository.UsuarioRepository;
 import com.auriel.auriel_financas.util.SenhaUtil;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioCreateDTO;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioResponseDTO;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioUpdateDTO;
 import com.auriel.auriel_financas.exception.GlobalException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
+import java.time.LocalDateTime;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UsuarioService {
@@ -22,66 +24,93 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UsuarioDTO criarUsuario(UsuarioCreateDTO usuarioCreateDTO) {
-        
+    public UsuarioResponseDTO registrar(UsuarioCreateDTO usuarioCreateDTO) {
         if (usuarioRepository.existsByEmail(usuarioCreateDTO.getEmail())) {
             throw GlobalException.emailJaCadastrado();
         }
 
         if (!SenhaUtil.validarCaracteresSenha(usuarioCreateDTO.getSenha())) {
-            throw GlobalException.senhaInvalida();            
+            throw GlobalException.senhaInvalida();
         }
 
         Usuario usuario = new Usuario();
         usuario.setNome(usuarioCreateDTO.getNome());
         usuario.setEmail(usuarioCreateDTO.getEmail());
         usuario.setSenha(passwordEncoder.encode(usuarioCreateDTO.getSenha()));
+        usuario.setTelefone(usuarioCreateDTO.getTelefone());
 
-        Usuario novoUsuario = usuarioRepository.save(usuario);
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-        // Retorna DTO sem senha
-        return new UsuarioDTO(novoUsuario.getId(), novoUsuario.getNome(), novoUsuario.getEmail());
+        return new UsuarioResponseDTO(
+                usuarioSalvo.getIdUsuario(),
+                usuarioSalvo.getNome(),
+                usuarioSalvo.getEmail(),
+                usuarioSalvo.getTelefone());
     }
 
-    public List<UsuarioDTO> listarUsuarios() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return usuarios.stream()
-                .map(usuario -> new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail()))
-                .toList();
+    public String autenticar(String email, String senha) {
+        Usuario usuario = usuarioRepository.findByEmail(email);
+        if (usuario == null) {
+            throw GlobalException.loginIncorreto();
+        }
+
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+            throw GlobalException.loginIncorreto();
+        }
+
+        LocalDateTime horaAtual = LocalDateTime.now();
+        usuario.setUltimoLogin(horaAtual);
+        
+        usuarioRepository.save(usuario);
+
+        // IMPLEMENTAR JWT AQUI DEPOIS
+
+        return "Autenticação bem-sucedida";
+
     }
 
-    public UsuarioDTO atualizarUsuario(Long id, UsuarioCreateDTO usuarioCreateDTO) {
-        Usuario usuario = usuarioRepository.findById(id)
+    public UsuarioResponseDTO atualizarPerfil(Long idUsuario, UsuarioUpdateDTO usuarioUpdateDTO) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> GlobalException.usuarioNaoEncontrado());
 
-        //A PRINCIPIO A SENHA NÃO DEVERIA SER ATUALIZADA AQUI, MAS VAMOS DEIXAR ASSIM POR ENQUANTO
-        if (usuarioCreateDTO.getSenha() != null) {
-            if (!SenhaUtil.validarCaracteresSenha(usuarioCreateDTO.getSenha())) {
-                throw GlobalException.senhaInvalida();
-            }
-            usuario.setSenha(passwordEncoder.encode(usuarioCreateDTO.getSenha()));
+        if (usuarioUpdateDTO.getNome() != null && !usuarioUpdateDTO.getNome().isEmpty()
+                && usuarioUpdateDTO.getNome() != usuario.getNome()) {
+            usuario.setNome(usuarioUpdateDTO.getNome());
         }
 
-        if (usuarioCreateDTO.getNome() != null) {
-            usuario.setNome(usuarioCreateDTO.getNome());
-        }
-        if (usuarioCreateDTO.getEmail() != null) {
-            if (!usuario.getEmail().equals(usuarioCreateDTO.getEmail()) &&
-                usuarioRepository.existsByEmail(usuarioCreateDTO.getEmail())) {
+        if (usuarioUpdateDTO.getEmail() != null && !usuarioUpdateDTO.getEmail().isEmpty()
+                && usuarioUpdateDTO.getEmail() != usuario.getEmail()) {
+            if (usuarioRepository.existsByEmail(usuarioUpdateDTO.getEmail())) {
                 throw GlobalException.emailJaCadastrado();
             }
-            usuario.setEmail(usuarioCreateDTO.getEmail());
+            usuario.setEmail(usuarioUpdateDTO.getEmail());
+        }
+
+        if (usuarioUpdateDTO.getTelefone() != null && !usuarioUpdateDTO.getTelefone().isEmpty()
+                && usuarioUpdateDTO.getTelefone() != usuario.getTelefone()) {
+            usuario.setTelefone(usuarioUpdateDTO.getTelefone());
         }
 
         Usuario usuarioAtualizado = usuarioRepository.save(usuario);
 
-        return new UsuarioDTO(usuarioAtualizado.getId(), usuarioAtualizado.getNome(), usuarioAtualizado.getEmail());
+        return new UsuarioResponseDTO(
+                usuarioAtualizado.getIdUsuario(),
+                usuarioAtualizado.getNome(),
+                usuarioAtualizado.getEmail(),
+                usuarioAtualizado.getTelefone());
     }
 
-    public void deletarUsuario(Long id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw GlobalException.usuarioNaoEncontrado();
+    public String trocarSenha(Long idUsuario, String senhaAtual, String novaSenha) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> GlobalException.usuarioNaoEncontrado());
+
+        if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
+            throw GlobalException.senhaAtualIncorreta();
         }
-        usuarioRepository.deleteById(id);
+
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        usuarioRepository.save(usuario);
+        return "Senha alterada com sucesso";
     }
+
 }

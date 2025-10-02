@@ -1,7 +1,8 @@
 package com.auriel.auriel_financas.controller;
 
-import com.auriel.auriel_financas.dto.UsuarioCreateDTO;
-import com.auriel.auriel_financas.dto.UsuarioDTO;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioCreateDTO;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioResponseDTO;
+import com.auriel.auriel_financas.dtos.UsuarioDTO.UsuarioUpdateDTO;
 import com.auriel.auriel_financas.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,26 +19,27 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody UsuarioCreateDTO usuarioCreateDTO) {
-        UsuarioDTO novoUsuario = usuarioService.criarUsuario(usuarioCreateDTO);
-        return ResponseEntity.ok(novoUsuario);
+    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioCreateDTO usuarioCreateDTO) {
+        UsuarioResponseDTO novoUsuario = usuarioService.registrar(usuarioCreateDTO);
+        return ResponseEntity.status(201).body(novoUsuario);
     }
 
-    @GetMapping()
-    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
-        List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
-        return ResponseEntity.ok(usuarios);
+    @PostMapping("/autenticar")
+    public ResponseEntity<String> autenticarUsuario(@RequestParam String email, @RequestParam String senha) {
+        String mensagem = usuarioService.autenticar(email, senha);
+        return ResponseEntity.ok().body(mensagem);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioCreateDTO usuarioCreateDTO) {
-        UsuarioDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioCreateDTO);
-        return ResponseEntity.ok(usuarioAtualizado);
+    @PatchMapping("/{idUsuario}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long idUsuario, @RequestBody UsuarioUpdateDTO usuarioResponseDTO)
+    {
+        UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizarPerfil(idUsuario, usuarioResponseDTO);
+        return ResponseEntity.ok().body(usuarioAtualizado);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
-        usuarioService.deletarUsuario(id);
-        return ResponseEntity.noContent().build();
-    }
+
+
+    
+
+   
 }

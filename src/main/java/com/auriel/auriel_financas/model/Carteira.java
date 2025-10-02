@@ -1,5 +1,8 @@
 package com.auriel.auriel_financas.model;
 
+
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,26 +17,23 @@ public class Carteira {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_carteira") 
+    private Long idCarteira;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private Usuario usuario; // Referência ao usuário que possui a carteira
+    @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
+    private Usuario usuario; // Referência ao usuário que possui a carteira    
 
-    @ManyToOne
-    @JoinColumn(name = "ativo_id", referencedColumnName = "id")
-    private Ativo ativo; // Referência ao ativo que está na carteira
-
-    @Column()
-    private Number quantidade; // Quantidade do ativo na carteira
+    @Column(nullable = false)
+    private String nome; // Nome da carteira
 
     @Column()
-    private Number precoMedio; // Preço médio de compra do ativo na carteira
+    private String descricao; // Descrição da carteira
 
-    public Number getTotalInvestido() {
-        if (quantidade != null && precoMedio != null) {
-            return quantidade.doubleValue() * precoMedio.doubleValue();
-        }
-        return 0;
-    }
+    @Column(nullable = false, name = "data_criacao", updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private LocalDateTime dataCriacao; 
+
+    
 }

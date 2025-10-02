@@ -1,6 +1,5 @@
-package com.auriel.auriel_financas.dto;
+package com.auriel.auriel_financas.dtos.UsuarioDTO;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,12 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioCreateDTO {
+public class UsuarioUpdateDTO {
+
+    private Long id_usuario;
 
     private String nome;
 
-    @Email    
     private String email;
+
+    private String telefone;
     
-    private String senha; 
 }

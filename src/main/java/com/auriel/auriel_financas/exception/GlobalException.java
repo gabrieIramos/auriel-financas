@@ -27,4 +27,20 @@ public class GlobalException extends RuntimeException {
     public static GlobalException ativoNaoEncontrado() {
         return new GlobalException("Ativo não encontrado");
     }
+
+    public static GlobalException loginIncorreto() {
+        return new GlobalException("Login incorreto");
+    }
+
+    public static GlobalException senhaAtualIncorreta() {
+        return new GlobalException("Senha atual incorreta");
+    }
+
+    public static GlobalException carteiraNaoEncontrada() {
+        return new GlobalException("Carteira não encontrada");
+    }
+
+    public static GlobalException ativoNaoEncontrado(String ticker) {
+        return new GlobalException("Ativo com ticker " + ticker + " não encontrado");
+    }
 }
